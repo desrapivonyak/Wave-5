@@ -51,7 +51,7 @@ Vector::~Vector()
 
 void Vector::set_size(const int size)
 {
-	if (size > 0)
+	if (size >= 0)
 	{
 		m_size = size;
 	}
@@ -59,7 +59,7 @@ void Vector::set_size(const int size)
 
 void Vector::set_capacity(const int capacity)
 {
-	if (capacity > 0)
+	if (capacity >= 0)
 	{
 		m_capacity = capacity;
 	}
@@ -77,6 +77,8 @@ int Vector::get_capacity() const
 
 int& Vector::operator[](const int index)
 {
+	if(index < 0 || index >= m_size)
+		throw std::out_of_range("Index Out of range");
 	return m_array[index];
 }
 
@@ -95,7 +97,7 @@ void Vector::push_back(const int& elem)
 
 void Vector::pop_back()
 {
-	--m_size;
+	resize(--m_size);
 }
 
 bool Vector::empty() const

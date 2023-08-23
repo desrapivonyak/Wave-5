@@ -49,7 +49,7 @@ Vector::~Vector()
 	m_array = nullptr;
 }
 
-void Vector::set_size(int size)
+void Vector::set_size(const int size)
 {
 	if (size > 0)
 	{
@@ -57,7 +57,7 @@ void Vector::set_size(int size)
 	}
 }
 
-void Vector::set_capacity(int capacity)
+void Vector::set_capacity(const int capacity)
 {
 	if (capacity > 0)
 	{

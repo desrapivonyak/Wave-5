@@ -23,6 +23,8 @@ public:
 	bool empty() const;
 	void resize(const int);
 	void shrink_to_fit();
+private:
+	void util(const int);
 //data members
 private:
 	int m_size;

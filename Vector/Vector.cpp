@@ -113,27 +113,25 @@ void Vector::resize(const int new_size)
 	{
 		m_capacity = 2 * m_capacity;
 	}
-	int* new_data = new int[new_size];
-	for (size_t i = 0; i < m_size; ++i)
-	{
-		new_data[i] = m_array[i];
-	}
-	delete[] m_array;
-	m_array = new_data;
-	m_size = new_size;
+	util(new_size);
 }
 
 void Vector::shrink_to_fit()
 {
 	if (m_size < m_capacity)
 	{
-		int* new_data = new int[m_size];
-		for (size_t i = 0; i < m_size; ++i)
-		{
-			new_data[i] = m_array[i];
-		}
-		delete[] m_array;
-		m_array = new_data;
-		m_capacity = m_size;
+		util(m_size);
 	}
+}
+
+void Vector::util(const int s)
+{
+	int* new_data = new int[s];
+	for (size_t i = 0; i < m_size; ++i)
+	{
+		new_data[i] = m_array[i];
+	}
+	delete[] m_array;
+	m_array = new_data;
+	m_capacity = m_size;
 }

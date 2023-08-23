@@ -100,11 +100,7 @@ void Vector::pop_back()
 
 bool Vector::empty() const
 {
-	if (m_size == 0)
-	{
-		return true;
-	}
-	return false;
+	return m_size == 0;
 }
 
 void Vector::resize(const int new_size)

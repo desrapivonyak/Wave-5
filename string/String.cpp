@@ -1,5 +1,6 @@
 #include "String.hpp"
 #include <cstring>
+#include <stdexcept>
 
 String::String()
     : m_capacity {0}
@@ -37,17 +38,16 @@ String::String(const String& str)
 
 String& String::operator=(const String& str)
 {
-    if (this == &str) 
+    if (this != &str) 
     {
-        return *this;
-    }
-    delete[] m_string;
-    m_size = str.m_size;
-    m_capacity = str.m_capacity;
-    m_string = new char[m_capacity];
-    for (int i = 0; i < m_size; ++i) 
-    {
-        m_string[i] = str.m_string[i];
+        delete[] m_string;
+        m_size = str.m_size;
+        m_capacity = str.m_capacity;
+        m_string = new char[m_capacity];
+        for (int i = 0; i < m_size; ++i) 
+        {
+            m_string[i] = str.m_string[i];
+        }
     }
     return *this;
 }
@@ -78,12 +78,16 @@ void String::set_size(const int size)
 
 char& String::operator[](const int index) 
 {
-    return m_string[index];
+    if(index < 0 || index >= m_size)
+		throw std::out_of_range("Index Out of range");
+	return m_string[index];
 }
 
 const char& String::operator[](const int index) const 
 {
-    return m_string[index];
+    if(index < 0 || index >= m_size)
+		throw std::out_of_range("Index Out of range");
+	return m_string[index];
 }
 
 const char* String::c_str() const

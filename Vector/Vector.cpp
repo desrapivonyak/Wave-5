@@ -27,18 +27,16 @@ Vector::Vector(const Vector& other)
 
 Vector& Vector::operator=(const Vector& other)
 {
-	if (this == &other)
+	if (this != &other)
 	{
-		return *this;
-	}
-
-	delete[] m_array;
-	m_size = other.m_size;
-	m_capacity = other.m_capacity;
-	m_array = new int[other.m_capacity];
-	for (int i = 0; i < m_size; ++i)
-	{
-		m_array[i] = other.m_array[i];
+		delete[] m_array;
+		m_size = other.m_size;
+		m_capacity = other.m_capacity;
+		m_array = new int[other.m_capacity];
+		for (int i = 0; i < m_size; ++i)
+		{
+			m_array[i] = other.m_array[i];
+		}
 	}
 	return *this;
 }

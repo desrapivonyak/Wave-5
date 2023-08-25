@@ -4,19 +4,20 @@
 
 int Library::m_totalBooks = 0;
 
-Library::Library(const int libraryID, int& administratorID, const std::string& address, const std::string& contact)
-        : m_libraryID {libraryID}
-        , m_administratorID {administratorID}
-        , m_address {address}
-        , m_contact {contact}
-        {}
+int Library::getTotalBooks() {
+    return m_totalBooks;
+}
+
+Library::Library(const unsigned int libraryID, int& administratorID, const std::string& address, const std::string& contact)
+    : m_libraryID {libraryID}
+    , m_administratorID {administratorID}
+    , m_address {address}
+    , m_contact {contact}
+{
+}
 
 Library::~Library() {
     m_totalBooks = 0;
-}
-
-int Library::getTotalBooks() {
-    return m_totalBooks;
 }
 
 void Library::addBook(const Book& book) {
@@ -26,9 +27,8 @@ void Library::addBook(const Book& book) {
 
 void Library::removeBook(const Book& book) {
     int index {};
-    for(int i = 0; i < m_books.size(); ++i) 
-    {
-        if(m_books[i].getISBN() == book.getISBN()) {
+    for (int i = 0; i < m_books.size(); ++i) {
+        if (m_books[i].getISBN() == book.getISBN()) {
             index = i;
             break;
         }
@@ -38,7 +38,7 @@ void Library::removeBook(const Book& book) {
 }
 
 void Library::dysplayBookInfo() const {
-    for (auto book : m_books) {
+    for (auto& book : m_books) {
         std::cout << "----------------------------------------" << std::endl;
         std::cout << "Title: " << book.getTitle() << std::endl;
         std::cout << "Author: " << book.getAuthor() << std::endl;

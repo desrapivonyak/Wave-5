@@ -15,7 +15,6 @@ Doubly_linked_list::Doubly_linked_list(const Doubly_linked_list& other) {
 
 Doubly_linked_list& Doubly_linked_list::operator=(const Doubly_linked_list& other) {
     if (this != &other) {
-        clear();
         copy(other);
     }
     return *this;

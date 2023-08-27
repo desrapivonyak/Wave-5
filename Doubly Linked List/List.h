@@ -1,22 +1,26 @@
 #ifndef DOUBLY_LINKED_LIST
 #define DOUBLY_LINKED_LIST
 
-class DoublyLinkedList {
+class Doubly_linked_list {
 public:
-    DoublyLinkedList();
-    DoublyLinkedList(const DoublyLinkedList&);
-    ~DoublyLinkedList();
-    DoublyLinkedList& operator=(const DoublyLinkedList&);
+    Doubly_linked_list();
+    Doubly_linked_list(const Doubly_linked_list&);
+    ~Doubly_linked_list();
+    Doubly_linked_list& operator=(const Doubly_linked_list&);
 
 public:
-    void pushFront(const int);
-    void pushBack(const int);
+    void push_front(const int);
+    void push_back(const int);
     void insert(const int, const int);
     void remove(const int);
     int get(const int) const;
-    void printList() const;
-    void printReverse() const;
+    void print_list() const;
+    void print_reverse() const;
     int size() const;
+
+private:
+    void copy(const Doubly_linked_list&);
+    void clear();
 
 private:
     struct Node {

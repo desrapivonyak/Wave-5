@@ -17,6 +17,7 @@ public:
     void print_list() const;
     void print_reverse() const;
     int size() const;
+    void traverse(bool (*f)(int));
 
 private:
     void copy(const Doubly_linked_list&);

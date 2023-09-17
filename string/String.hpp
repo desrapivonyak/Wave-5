@@ -3,7 +3,7 @@
 class String {
 //ctors and dtor
 public:
-    String(); //default ctor
+    String() = default; //default ctor
     explicit String(const int); //ctor with parameter initializing size
     String(const char*); //ctor with parameter initializing chr*
     String(const String&); //copy ctor
@@ -21,10 +21,13 @@ public:
     void shrink_to_fit();
 //utility function
 private:
-    void util(const int);
+    void utility_function(const int);
+    void duplicate(const String& arr);
 //data members
 private:
-    int m_size;
-    int m_capacity;
-    char* m_string;
+    struct { int size; char* ptr; } dyn_str;
+    union {
+        char onstack[16];
+        decltype(dyn_str) str;
+    } m_string;
 };

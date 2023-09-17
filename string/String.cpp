@@ -1,129 +1,186 @@
 #include "String.hpp"
 #include <cstring>
+#include <iostream>
 #include <stdexcept>
 
-String::String()
-    : m_capacity {0}
-    , m_size {0}
-    , m_string {new char[m_capacity] {}} 
-{}
+// String::String(const int size)
+// {
+//     if(size > 16) {
+//         dyn_str.size = size;
+//         dyn_str.ptr = new char[size];
+//     }
+// }
 
-String::String(const int size)
-    : m_capacity {size}
-    , m_size {size}
-    , m_string {new char[size] {}}
-{}
-
-String::String(const char* str) 
+String::String(const char* arr) 
 {
-    m_size = strlen(str);
-    m_capacity = strlen(str);
-    m_string = new char[m_capacity];
-    for (int i = 0; i < m_size; ++i) 
+    int length = strlen(arr);
+    if (length <= 16)
     {
-        m_string[i] = str[i];
+        m_string.onstack[length] = '\0';
+        memcpy(m_string.onstack, arr, length);
+    } 
+    else
+    {
+        dyn_str.size = length;
+        dyn_str.ptr = new char[length + 1];
+        strcpy(dyn_str.ptr, arr);
     }
 }
 
-String::String(const String& str) 
-{
-    m_size = str.m_size;
-    m_capacity = str.m_capacity;
-    m_string = new char[m_capacity];
-    for (int i = 0; i < m_size; ++i) 
-    {
-        m_string[i] = str.m_string[i];
-    }
-}
+// String::String(const String& arr) 
+// {
+//     duplicate(arr);
+// }
 
-String& String::operator=(const String& str)
-{
-    if (this != &str) 
-    {
-        delete[] m_string;
-        m_size = str.m_size;
-        m_capacity = str.m_capacity;
-        m_string = new char[m_capacity];
-        for (int i = 0; i < m_size; ++i) 
-        {
-            m_string[i] = str.m_string[i];
-        }
-    }
-    return *this;
-}
+// String& String::operator=(const String& arr)
+// {
+//     if (this != &arr) 
+//     {
+//         duplicate(arr);
+//     }
+//     return *this;
+// }
 
 String::~String() 
 {
-    delete[] m_string;
-    m_string = nullptr;
+    if (dyn_str.ptr)
+    {
+        delete[] dyn_str.ptr;
+        dyn_str.ptr = nullptr;
+    }
 }
 
 int String::size() const 
 {
-    return m_size;
-}
-
-int String::capacity() const 
-{
-    return m_capacity;
-}
-
-void String::set_size(const int size)
-{
-    if (size >= 0)
+    if(dyn_str.ptr)
     {
-        m_size = size;
+        return dyn_str.size;
     }
+    return strlen(m_string.onstack);
 }
 
-char& String::operator[](const int index) 
-{
-    if(index < 0 || index >= m_size)
-		throw std::out_of_range("Index Out of range");
-	return m_string[index];
-}
+// int String::capacity() const 
+// {
+//     if (m_string.str.ptr)
+//     {
+//         return m_string.str.m_capacity;
+//     }
+//     return 16;
+// }
 
-const char& String::operator[](const int index) const 
-{
-    if(index < 0 || index >= m_size)
-		throw std::out_of_range("Index Out of range");
-	return m_string[index];
-}
+// char& String::operator[](const int index) 
+// {
+//     if (index < 0)
+//     {
+// 		throw std::out_of_range("Index Out of range");
+//     }
+
+// 	if (m_string.str.ptr) 
+//     {
+//         if(index >= m_string.str.m_size)
+//         {
+//             throw std::out_of_range("Index Out of range");
+//         }
+//         return m_string.str.ptr[index];
+//     }
+//     return m_string.onstack[index];
+// }
+
+// const char& String::operator[](const int index) const 
+// {
+//     if (index < 0)
+//     {
+// 		throw std::out_of_range("Index Out of range");
+//     }
+    
+// 	if (m_string.str.ptr) 
+//     {
+//         if(index >= m_string.str.m_size)
+//         {
+//             throw std::out_of_range("Index Out of range");
+//         }
+//         return m_string.str.ptr[index];
+//     }
+//     return m_string.onstack[index];
+// }
 
 const char* String::c_str() const
 {
-    return m_string;
-}
-
-bool String::empty() const
-{
-    return m_size == 0;
-}
-
-void String::reserve(const int new_cap)
-{
-    if (new_cap > m_capacity)
+    if (dyn_str.ptr)
     {
-        util(new_cap);
+        return dyn_str.ptr;
     }
+    return m_string.onstack;
 }
 
-void String::shrink_to_fit() 
-{
-    if(m_capacity > m_size)
-    {
-        util(m_size);
-    }
-}
+// bool String::empty() const
+// {
+//     if (m_string.str.ptr) 
+//     {
+//         return m_string.str.m_size == 0;
+//     }
+//     return strlen(m_string.onstack) == 0;
+// }
 
-void String::util(const int s)
-{
-    char* new_str = new char[s];
-    for (int i = 0; i < m_size; ++i)
-    {
-        new_str[i] = m_string[i];
-    }
-    delete[] m_string;
-    m_capacity = s;
-    m_string = new_str;
-}
+// void String::reserve(const int new_cap)
+// {
+//     if (m_string.str.ptr)
+//     {
+//         if (new_cap > m_string.str.m_capacity)
+//         {
+//             utility_function(new_cap);
+//         }
+//     }
+// }
+
+// void String::shrink_to_fit() 
+// {
+//     if (m_string.str.ptr)
+//     {
+//         if (m_string.str.m_size < m_string.str.m_capacity)
+//         {
+//             utility_function(m_string.str.m_size);
+//         }
+//     }
+// }
+
+// void String::utility_function(const int s)
+// {
+//     char* new_str = new char[s];
+//     for (int i = 0; i < m_string.str.m_size; ++i)
+//     {
+//         new_str[i] = m_string.str.ptr[i];
+//     }
+//     delete[] m_string.str.ptr;
+//     m_string.str.m_capacity = s;
+//     m_string.str.ptr = new_str;
+// }
+
+// void String::duplicate(const String& arr) 
+// {
+//     if (arr.m_string.str.ptr) 
+//     {
+//         if (m_string.str.ptr)
+//         {
+//             delete[] m_string.str.ptr;
+//         }
+//         m_string.str.m_capacity = arr.m_string.str.m_capacity;
+//         m_string.str.m_size = arr.m_string.str.m_size;
+//         m_string.str.ptr = new char[m_string.str.m_capacity];
+//         for (int i = 0; i < m_string.str.m_capacity; ++i)
+//         {
+//             m_string.str.ptr[i] = arr.m_string.str.ptr[i];
+//         }
+//     }
+//     else
+//     {
+//         if (m_string.str.ptr)
+//         {
+//             delete[] m_string.str.ptr;
+//         }
+//         for (int i = 0; i < strlen(arr.m_string.onstack); ++i)
+//         {
+//             m_string.onstack[i] = arr.m_string.onstack[i];
+//         }
+//     }
+// }

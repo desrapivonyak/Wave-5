@@ -173,3 +173,11 @@ void Doubly_linked_list::copy(const Doubly_linked_list& other) {
     m_tail = prev;
     m_size = other.m_size;
 }
+
+void Doubly_linked_list::traverse(bool (*f)(int)) {
+    Node* tmp = m_head;
+    while (tmp != nullptr) {
+        if(f(tmp->m_value)) std::cout << tmp->m_value << " ";
+        tmp = tmp->m_next;
+    }
+}

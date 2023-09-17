@@ -11,6 +11,39 @@ SpreadsheetCell::SpreadsheetCell(const double dnum) : mValue {std::to_string(dnu
 
 SpreadsheetCell::SpreadsheetCell(const int inum) : mValue {std::to_string(inum)} {}
 
+SpreadsheetCell& SpreadsheetCell::operator=(const SpreadsheetCell& src) {
+    if (this != &src) {
+        mValue = src.mValue;
+    }
+    return *this;
+}
+
+SpreadsheetCell::operator int() const{
+    return getIntValue();
+} 
+
+SpreadsheetCell::operator double() const{
+    return getDoubleValue();
+}
+
+// void SpreadsheetCell::operator++() {
+//     if (getIntValue()) {
+//         static_cast<int>(mValue)++;
+//     }
+//     else if(getDoubleValue()) {
+//         static_cast<double>(mValue)++;
+//     }
+// }
+
+// void SpreadsheetCell::operator--() {
+//     if (getIntValue()) {
+//         int(mValue)--;
+//     }
+//     else if(getDoubleValue()) {
+//         double(mValue)--;
+//     }
+// }
+
 void SpreadsheetCell::setStringValue(const std::string& str) {
     mValue = str;
 }
@@ -39,4 +72,10 @@ int SpreadsheetCell::getIntValue() const {
         return 1;  // Exit with error code
     }
     return num;
+}
+
+//none member function
+std::ostream& operator<<(std::ostream& out, const SpreadsheetCell& cell) {
+    out << cell.getStringValue();
+    return out;
 }

@@ -46,6 +46,14 @@ SpreadsheetCell* Spreadsheet::getCell(const int row, const int column) const {
     return &mCell[row][column];
 }
 
+int Spreadsheet::getRow() const {
+    return mRow;
+}
+
+int Spreadsheet::getColumn() const {
+    return mColumn;
+}
+
 void Spreadsheet::addRow(const int count) {
     int newRow = mRow + count;
     SpreadsheetCell** newCell = new SpreadsheetCell*[newRow];
@@ -142,20 +150,38 @@ void Spreadsheet::removeColumn(const int index) {
     mColumn = newColumn;
 }
 
-void Spreadsheet::printCells() {
-    const int cellWidth = 12;
-    
-    for (int i = 0; i < mRow; ++i) {
-        std::cout << " " << std::string((cellWidth + 1) * mColumn, '-') << std::endl;
+Spreadsheet& Spreadsheet::operator=(const Spreadsheet& other) {
+    if (this != &other) {
+        mRow = other.mRow;
+        mColumn = other.mColumn;
+        mCell = new SpreadsheetCell*[mRow];
+        for (int i = 0; i < mRow; ++i) {
+            mCell[i] = new SpreadsheetCell[mColumn];
 
-        for (int j = 0; j < mColumn; ++j) {
-            std::cout << "| " << std::left << std::setw(cellWidth - 2)
-                      << mCell[i][j].getStringValue() << " ";
+            for (int j = 0; j < mColumn; ++j) {
+                mCell[i][j] = other.mCell[i][j];
+            }
         }
-        std::cout << "|\n";
     }
+    return *this;
+}
 
-    std::cout << " " << std::string((cellWidth + 1) * mColumn, '-') << std::endl;
+SpreadsheetCell* Spreadsheet::operator[](const int row) {
+    if (row > mRow || row < 0) {
+        throw std::out_of_range("Index is out of range.");
+    }
+    return mCell[row];
+}
+
+SpreadsheetCell* Spreadsheet::operator[](const SpreadsheetCell& other) {
+    for (int i = 0; i < mRow; ++i) {
+        for (int j = 0; j < mColumn; ++j) {
+            if (mCell[i][j].getStringValue() == other.getStringValue()) {
+                return mCell[i];
+            }
+        }
+    }
+    return nullptr;
 }
 
 //helper function
@@ -163,4 +189,59 @@ void Spreadsheet::checkIndexes(const int row, const int column) const {
     if (row < 0 || row > mRow || column < 0 || column > mColumn) {
         throw std::out_of_range("Out of range.");
     }
+}
+
+std::ostream& operator<<(std::ostream& out, const Spreadsheet& src) {
+    const int cellWidth = 12;
+    
+    for (int i = 0; i < src.getRow(); ++i) {
+        out << " " << std::string((cellWidth + 1) * src.getColumn(), '-') << std::endl;
+
+        for (int j = 0; j < src.getColumn(); ++j) {
+            out << "| " << std::left << std::setw(cellWidth - 2) << src.getCell(i, j)->getStringValue() << " ";
+        }
+        out << "|\n";
+    }
+
+    out << " " << std::string((cellWidth + 1) * src.getColumn(), '-') << std::endl;
+    return out;
+}
+
+Spreadsheet operator+(const Spreadsheet& op1, const Spreadsheet& op2) {
+    int newRow = op1.getRow() + op2.getRow();
+    int newColumn = std::max(op1.getColumn(), op2.getColumn());
+    
+    Spreadsheet newSheet;
+    newSheet.addRow(newRow);
+    newSheet.addColumn(newColumn);
+
+    int q = 0;
+
+    for (int i = 0; i < op1.getRow(); ++i) {
+        int p = 0;
+        for (int j = 0; j < op1.getColumn(); ++j) {
+            newSheet.setCell(q, p, op1.getCell(i, j)->getStringValue());
+            ++p;
+        }
+        while (p != newColumn) {
+            newSheet.setCell(q, p, "");
+            ++p;
+        }
+        ++q;
+    }
+
+    for (int i = 0; i < op2.getRow(); ++i) {
+        int p = 0;
+        for (int j = 0; j < op2.getColumn(); ++j) {
+            newSheet.setCell(q, p, op2.getCell(i, j)->getStringValue());
+            ++p;
+        }
+        while (p != newColumn) {
+            newSheet.setCell(q, p, "");
+            ++p;
+        }
+        ++q;
+    }
+
+    return newSheet;
 }

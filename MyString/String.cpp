@@ -1,216 +1,173 @@
 #include "MyString.hpp"
 #include <cstring>
 
-//Constructors
-MyString::MyString()
-{
-    m_string.ptr = nullptr;
+// Constructors
+MyString::MyString() : m_on_stack{true} { m_string.onstack[0] = '\0'; }
+
+MyString::MyString(const char *c_arr) : m_on_stack{true} {
+  size_t length = strlen(c_arr);
+  if (length > 16) {
+    m_string.ptr = new char[length + 1];
+    m_on_stack = false;
+    strcpy(m_string.ptr, c_arr);
+  } else {
+    strcpy(m_string.onstack, c_arr);
+  }
 }
 
-MyString::MyString(const char* c_arr) 
-{
-    size_t length = strlen(c_arr);
-    if (length < 16)
-    {
-        std::memcpy(m_string.onstack, c_arr, length + 1);
-        m_string.onstack[length] = '\0';
-        m_string.ptr = nullptr;
-    } 
-    else
-    {
-        m_string.ptr = new char[length + 1];
-        std::memcpy(m_string.ptr, c_arr, length + 1);
-    }
-}
+MyString::MyString(const std::string &str) : MyString(str.c_str()) {}
 
-MyString::MyString(const std::string& str)
-    : MyString(str.c_str())
-{
-}
-
-MyString::MyString(const MyString& other)
-{
+MyString::MyString(const MyString &other) : m_on_stack{other.m_on_stack} {
+  if (!m_on_stack) {
     size_t length = strlen(other.m_string.ptr);
-    if (other.m_string.ptr)
-    {
-        m_string.ptr = new char[length + 1];
-        std::memcpy(m_string.ptr, other.m_string.ptr, length + 1);
-    }
-    else
-    {
-        std::memcpy(m_string.onstack, other.m_string.onstack, length + 1);
-        m_string.ptr = nullptr;
-    }
+    m_string.ptr = new char[length + 1];
+    strcpy(m_string.ptr, other.m_string.ptr);
+  } else {
+    strcpy(m_string.onstack, other.m_string.onstack);
+  }
 }
 
-//Copy assigment operators
-MyString& MyString::operator=(const MyString& other)
-{
-    if(this != &other)
-    {
-        if (other.m_string.ptr)
-        {
-            size_t length = strlen(other.m_string.ptr);
-            m_string.ptr = new char[length];
-            for (size_t i = 0; i < length; ++i)
-            {
-                m_string.ptr[i] = other.m_string.ptr[i];
-            }
-        }
-        else
-        {
-            size_t length = strlen(other.m_string.onstack);
-            m_string.onstack[length] = '\0';
-            memcpy(m_string.onstack, other.m_string.onstack, length);
-        }
-    }
-    return *this;
+MyString::MyString(MyString &&other) : m_on_stack{other.m_on_stack} {
+  if (!m_on_stack) {
+    m_string.ptr = other.m_string.ptr;
+    other.m_string.ptr = nullptr;
+  } else {
+    strcpy(m_string.onstack, other.m_string.onstack);
+  }
+  other.reset();
 }
 
-MyString& MyString::operator=(const char* cstr)
-{
-    size_t length = strlen(cstr);
-    if (length <= 16)
-    {
-        m_string.onstack[length] = '\0';
-        memcpy(m_string.onstack, cstr, length);
-    } 
-    else
-    {
-        m_string.ptr = new char[length + 1];
-        strcpy(m_string.ptr, cstr);
+// Copy assigment operator
+MyString &MyString::operator=(const MyString &other) {
+  if (this != &other) {
+    reset();
+    size_t length = strlen(other.m_string.ptr);
+    if (!other.m_on_stack) {
+      m_string.ptr = new char[length + 1];
+      strcpy(m_string.ptr, other.m_string.ptr);
+      m_on_stack = false;
+    } else {
+      strcpy(m_string.onstack, other.m_string.onstack);
+      m_on_stack = true;
     }
-    return *this;
+  }
+  return *this;
 }
 
-MyString& MyString::operator=(const std::string& str)
-{
-    size_t length = str.size();
-    if (length < 16)
-    {
-        m_string.onstack[length] = '\0';
-        for (size_t i = 0; i < length; ++i)
-        {
-            m_string.onstack[i] = str[i];
-        }
-    }
-    else
-    {
-        m_string.ptr = new char[length];
-        for (size_t i = 0; i < length; ++i)
-        {
-            m_string.ptr[i] = str[i];
-        }
-    }
-    return *this;
+MyString &MyString::operator=(const char *str) { return assign(str); }
+
+MyString &MyString::operator=(const std::string &str) {
+  return assign(str.c_str());
 }
 
-//Destructor
-MyString::~MyString()
-{
-    if (m_string.ptr)
-    {
-        delete[] m_string.ptr;
+MyString &MyString::operator=(MyString &&other) {
+  if (this != &other) {
+    reset();
+    size_t length = strlen(other.m_string.ptr);
+    if (!other.m_on_stack) {
+      m_string.ptr = new char[length + 1];
+      strcpy(m_string.ptr, other.m_string.ptr);
+      m_on_stack = false;
+    } else {
+      strcpy(m_string.onstack, other.m_string.onstack);
+      m_on_stack = true;
     }
+    other.reset();
+  }
+  return *this;
 }
 
-//Other member functions
-char& MyString::operator[](const size_t index) 
-{
-    if (index < 0 && index > std::max(strlen(m_string.onstack), strlen(m_string.ptr)))
-    {
-        throw std::out_of_range("Index out of range.");
-    }
-    return m_string.ptr ? m_string.ptr[index] : m_string.onstack[index];
+// Destructor
+MyString::~MyString() {
+  if (!m_on_stack) {
+    delete[] m_string.ptr;
+  }
 }
 
-size_t MyString::size() const
-{
-    return std::max(strlen(m_string.onstack), strlen(m_string.ptr));
+// Other member functions
+char &MyString::operator[](const size_t index) {
+  if (index < 0 &&
+      index > std::max(strlen(m_string.onstack), strlen(m_string.ptr))) {
+    throw std::out_of_range("Index out of range.");
+  }
+  return !m_on_stack ? m_string.ptr[index] : m_string.onstack[index];
 }
 
-const char* MyString::c_str() const
-{
-    return m_string.ptr ? m_string.ptr : m_string.onstack;
+const char &MyString::operator[](const size_t index) const {
+  if (index < 0 &&
+      index > std::max(strlen(m_string.onstack), strlen(m_string.ptr))) {
+    throw std::out_of_range("Index out of range.");
+  }
+  return !m_on_stack ? m_string.ptr[index] : m_string.onstack[index];
 }
 
-bool MyString::empty() const
-{
-    return size() == 0;
+size_t MyString::size() const {
+  return m_on_stack ? strlen(m_string.onstack) : strlen(m_string.ptr);
 }
 
-void MyString::reset() 
-{
-    if (m_string.ptr)
-    {
-        delete[] m_string.ptr;
-        m_string.ptr = nullptr;
-    }
-    else 
-    {
-        m_string.onstack[0] = '\0';
-    }
+const char *MyString::c_str() const {
+  return m_on_stack ? m_string.onstack : m_string.ptr;
 }
 
-// MyString& MyString::operator+=(const char* cstr)
-// {
-//     size_t new_size = strlen(cstr) + m_size;
-//     char* new_str = new char[new_size];
-//     for(size_t i = m_size - 1; i < new_size; ++i)
-//     {
-//         new_str[i] = cstr[i];
-//     }
-//     delete[] m_ptr;
-//     m_size = new_size;
-//     m_ptr = new_str;
-//     return *this;
-// }
+bool MyString::empty() const { return size() == 0; }
 
-// MyString& MyString::operator+=(const MyString& str)
-// {
-//     MyString new_str;
-//     size_t new_size = m_size + str.size();
-//     new_str = new char[new_size];
-//     for(size_t i = str.size() - 1; i < new_size; ++i)
-//     {
-//         new_str.m_ptr[i] = str.m_ptr[i];
-//     }
-//     delete[] m_ptr;
-//     m_size = new_size;
-//     m_ptr = new_str.m_ptr;
-//     return *this;
-// }
-
-// MyString& MyString::operator+=(const std::string& str)
-// {
-//     size_t new_size = m_size + str.size();
-//     char* new_str = new char[new_size];
-//     for(size_t i = str.size() - 1; i < new_size; ++i)
-//     {
-//         new_str[i] = str[i];
-//     }
-//     delete[] m_ptr;
-//     m_size = new_size;
-//     m_ptr = new_str;
-//     return *this;
-// }
-
-//friend functions
-std::ostream& operator<<(std::ostream& os, const MyString& str)
-{
-    os << str.c_str();
-    return os;
+void MyString::reset() {
+  if (!m_on_stack) {
+    delete[] m_string.ptr;
+    m_string.ptr = nullptr;
+  }
+  m_on_stack = true;
 }
 
-std::istream& operator>>(std::istream& in, MyString& str)
-{
-    if (str.m_string.ptr)
-    {
-        in >> str.m_string.ptr;
-    }
-    else
-    {
-        in >> str.m_string.onstack;
-    }
-    return in;
+MyString &MyString::operator+=(const char *cstr) {
+  size_t len = strlen(cstr);
+  size_t total_len = size() + len;
+  if (m_on_stack && total_len <= 16) {
+    strcat(m_string.onstack, cstr);
+  } else {
+    char *new_str = new char[total_len + 1];
+    strcpy(new_str, c_str());
+    strcat(new_str, cstr);
+    reset();
+    m_string.ptr = new_str;
+    m_on_stack = false;
+  }
+  return *this;
+}
+
+MyString &MyString::operator+=(const MyString &str) {
+  operator+=(str.c_str());
+  return *this;
+}
+
+MyString &MyString::operator+=(const std::string &str) {
+  operator+=(str.c_str());
+  return *this;
+}
+
+MyString &MyString::assign(const char *str) {
+  reset();
+  size_t length = strlen(str);
+  if (length > 16) {
+    m_string.ptr = new char[length + 1];
+    m_on_stack = false;
+    strcpy(m_string.ptr, str);
+  } else {
+    strcpy(m_string.onstack, str);
+  }
+  return *this;
+}
+
+// other functions
+
+std::istream &operator>>(std::istream &is, MyString &str) {
+  char buffer[1024];
+  is >> buffer;
+  str = buffer;
+  return is;
+}
+
+std::ostream &operator<<(std::ostream &os, const MyString &str) {
+  os << str.c_str();
+  return os;
 }

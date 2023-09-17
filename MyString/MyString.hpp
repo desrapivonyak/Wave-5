@@ -8,16 +8,18 @@ class MyString
 {
 public:
     MyString();
-    MyString(const char*);
-    MyString(const std::string&);
+    explicit MyString(const char*);
+    explicit MyString(const std::string&);
     MyString(const MyString&);
+    MyString(MyString&&);
 
+    MyString& operator=(const MyString&);
     MyString& operator=(const char*);
     MyString& operator=(const std::string&);
-    MyString& operator=(const MyString&);
+    MyString& operator=(MyString&&);
 
     char& operator[](const size_t);
-    const char operator[](const size_t) const;
+    const char& operator[](const size_t) const;
 
     ~MyString();
 
@@ -31,14 +33,19 @@ public:
     MyString& operator+=(const std::string&);
     MyString& operator+=(const MyString&);
 
-    friend std::ostream& operator<<(std::ostream&, const MyString&);
-    friend std::istream& operator>>(std::istream&, MyString&);
 private:
+    MyString& assign(const char*);
+
+private:
+    bool m_on_stack;
     union
     {
         char onstack[16];
         char* ptr;
     } m_string;
 };
+
+std::ostream& operator<<(std::ostream&, const MyString&);
+std::istream& operator>>(std::istream&, MyString&);
 
 #endif
